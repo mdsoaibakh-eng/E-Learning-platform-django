@@ -1,0 +1,29 @@
+{% extends "lms/base.html" %}
+{% block content %}
+<h2>Create Internship</h2>
+<form method="POST">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label>Title</label>
+        <input type="text" name="title" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label>Description</label>
+        <textarea name="description" class="form-control" rows="3"></textarea>
+    </div>
+    <div class="mb-3">
+        <label>Duration (e.g. 3 Months)</label>
+        <input type="text" name="duration" class="form-control">
+    </div>
+    <div class="mb-3">
+        <label>Assign Instructor</label>
+        <select name="instructor_id" class="form-control">
+            <option value="">-- None --</option>
+            {% for inst in instructors %}
+            <option value="{{ inst.id }}">{{ inst.username }} ({{ inst.full_name }})</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn btn-success">Create</button>
+</form>
+{% endblock %}

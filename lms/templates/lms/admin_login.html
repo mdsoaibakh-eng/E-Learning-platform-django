@@ -1,0 +1,21 @@
+{% extends "lms/base.html" %}
+
+{% block title %}Admin Login - CampusEvents{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+  <h1>Admin Login</h1>
+  <form method="post"> {% csrf_token %}
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input type="text" name="username" id="username" required class="form-control">
+    </div>
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" name="password" id="password" required class="form-control">
+    </div>
+    <button type="submit" class="btn btn-primary btn-block">Login</button>
+  </form>
+
+</div>
+{% endblock %}

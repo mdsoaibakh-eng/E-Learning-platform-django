@@ -1,0 +1,72 @@
+{% extends "lms/base.html" %}
+{% load static %}
+{% block content %}
+<h2>{{ internship.title }}</h2>
+<p>{{ internship.description }}</p>
+<hr>
+
+<!-- Materials -->
+<h4>Learning Materials</h4>
+<ul class="list-group mb-4">
+    {% for m in internship.materials.all %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        {{ m.title }}
+        <a href="{{ MEDIA_URL }}{{ m.file_path }}" target="_blank" class="btn btn-sm btn-outline-primary">View
+            Resource</a>
+    </li>
+    {% empty %}
+    <li class="list-group-item">No materials yet.</li>
+    {% endfor %}
+</ul>
+
+<!-- Quizzes -->
+<h4>Quizzes</h4>
+<ul class="list-group mb-4">
+    {% for q in internship.quizzes.all %}
+    <li class="list-group-item d-flex justify-content-between align-items-center">
+        {{ q.title }}
+        <a href="{% url 'student_take_internship_quiz' internship_id=internship.id quiz_id=q.id %}"
+            class="btn btn-sm btn-primary">Take Quiz</a>
+    </li>
+    {% empty %}
+    <li class="list-group-item">No quizzes yet.</li>
+    {% endfor %}
+</ul>
+
+<!-- Final Project -->
+<div class="card">
+    <div class="card-header">Final Project</div>
+    <div class="card-body">
+        {% with proj=internship.projects.first %}
+        {% if proj %}
+        <h5>{{ proj.title }}</h5>
+        <p>{{ proj.description|linebreaksbr }}</p>
+
+        {% if enrollment.project_status == 'Approved' %}
+        <div class="alert alert-success">Project Approved! <a
+                href="{% url 'student_internship_certificate' internship_id=internship.id %}">Download Certificate</a>
+        </div>
+        {% elif enrollment.project_status == 'Submitted' or enrollment.project_status == 'Pending' and
+        enrollment.project_submission %}
+        <div class="alert alert-info">Submitted. Waiting for review.</div>
+        {% else %}
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label>Upload Project File</label>
+                <input type="file" name="project_file" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Project</button>
+            {% if enrollment.project_status == 'Rejected' %}
+            <p class="text-danger mt-2">Previous submission was rejected. Please try again.</p>
+            {% endif %}
+        </form>
+        {% endif %}
+        {% else %}
+        <p>No project defined yet.</p>
+        {% endif %}
+        {% endwith %}
+    </div>
+</div>
+
+{% endblock %}

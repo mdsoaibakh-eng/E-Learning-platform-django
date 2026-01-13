@@ -1,0 +1,77 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Student Applications</title>
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+
+<body>
+  <nav class="nav">
+    <div class="container nav-inner">
+      <a class="brand" href="{% url 'index' %}">FlaskCRUD</a>
+      <div>
+        <a class="btn btn-outline" href="{% url 'admin_logout' %}">Logout</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="container">
+
+    <h1>Student Applications</h1>
+
+
+    {% if messages %}
+    <div class="flashes">
+      {% for message in messages %}
+      <div class="flash {{ message.tags }}">{{ message }}</div>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Student</th>
+          <th>Resume</th>
+          <th>Status</th>
+          <th>Approve</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for app in applications %}
+        <tr>
+          <td>{{ app.student.username }}</td>
+          <td>
+            <a href="{{ MEDIA_URL }}{{ app.resume_filename }}" target="_blank">
+              View Resume
+            </a>
+          </td>
+          <td>{{ app.status }}</td>
+          <td>
+            {% if app.status != 'Approved' %}
+            <form method="post" action="{% url 'approve_application' app_id=app.id %}">
+              {% csrf_token %}
+              <button class="btn">Approve</button>
+            </form>
+            {% else %}
+            Approved
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="4">No applications yet.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+
+  </main>
+</body>
+
+</html>

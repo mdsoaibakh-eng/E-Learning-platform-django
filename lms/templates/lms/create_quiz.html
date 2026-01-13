@@ -1,0 +1,131 @@
+{% extends "lms/base.html" %}
+
+{% block title %}Create Quiz - E-Learning{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Create Quiz for {{ course.title }}</h4>
+            </div>
+            <div class="card-body">
+                <form method="post" id="quizForm"> {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Quiz Title</label>
+                        <input type="text" name="title" id="title" class="form-control" required>
+                    </div>
+
+                    <hr>
+                    <h5>Questions</h5>
+                    <div id="questions-container">
+                        <!-- Questions will be added here -->
+                    </div>
+
+                    <button type="button" class="btn btn-outline-primary mb-3" onclick="addQuestion()">+ Add
+                        Question</button>
+
+                    <input type="hidden" name="questions_json" id="questions_json">
+
+                    <div class="d-flex justify-content-between border-top pt-3">
+                        <button type="submit" class="btn btn-success">Save Quiz</button>
+                        <a href="{% url 'instructor_dashboard' %}" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<template id="question-template">
+    <div class="card mb-3 question-card bg-light">
+        <div class="card-body">
+            <div class="d-flex justify-content-between mb-2">
+                <h6>Question <span class="q-num">1</span></h6>
+                <button type="button" class="btn btn-sm btn-danger remove-q"
+                    onclick="removeQuestion(this)">Remove</button>
+            </div>
+            <div class="mb-2">
+                <input type="text" class="form-control q-text" placeholder="Question Text" required>
+            </div>
+            <div class="row g-2">
+                <div class="col-md-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">A</span>
+                        <input type="text" class="form-control q-opt-a" placeholder="Option A" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">B</span>
+                        <input type="text" class="form-control q-opt-b" placeholder="Option B" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">C</span>
+                        <input type="text" class="form-control q-opt-c" placeholder="Option C" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="input-group input-group-sm">
+                        <span class="input-group-text">D</span>
+                        <input type="text" class="form-control q-opt-d" placeholder="Option D" required>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-2">
+                <label class="form-label small">Correct Answer</label>
+                <select class="form-select form-select-sm q-correct">
+                    <option value="A">Option A</option>
+                    <option value="B">Option B</option>
+                    <option value="C">Option C</option>
+                    <option value="D">Option D</option>
+                </select>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script>
+    function addQuestion() {
+        const container = document.getElementById('questions-container');
+        const template = document.getElementById('question-template');
+        const clone = template.content.cloneNode(true);
+        container.appendChild(clone);
+        updateNumbers();
+    }
+
+    function removeQuestion(btn) {
+        btn.closest('.question-card').remove();
+        updateNumbers();
+    }
+
+    function updateNumbers() {
+        const cards = document.querySelectorAll('.question-card');
+        cards.forEach((card, index) => {
+            card.querySelector('.q-num').textContent = index + 1;
+        });
+    }
+
+    document.getElementById('quizForm').addEventListener('submit', function (e) {
+        const questions = [];
+        document.querySelectorAll('.question-card').forEach(card => {
+            questions.push({
+                text: card.querySelector('.q-text').value,
+                options: {
+                    A: card.querySelector('.q-opt-a').value,
+                    B: card.querySelector('.q-opt-b').value,
+                    C: card.querySelector('.q-opt-c').value,
+                    D: card.querySelector('.q-opt-d').value
+                },
+                correct: card.querySelector('.q-correct').value
+            });
+        });
+        document.getElementById('questions_json').value = JSON.stringify(questions);
+    });
+
+    // Add first question by default
+    addQuestion();
+</script>
+{% endblock %}

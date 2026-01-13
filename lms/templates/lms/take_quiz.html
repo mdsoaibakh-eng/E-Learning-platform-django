@@ -1,0 +1,50 @@
+{% extends "lms/base.html" %}
+
+{% block title %}Take Quiz - {{ quiz.title }}{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">Quiz: {{ quiz.title }}</h4>
+            </div>
+            <div class="card-body">
+                <form method="post"> {% csrf_token %}
+                    {% for q in questions %}
+                    <div class="mb-4">
+                        <h5>{{ loop.index }}. {{ q.text }}</h5>
+                        <div class="list-group">
+                            <label class="list-group-item">
+                                <input class="form-check-input me-1" type="radio" name="question_{{ loop.index0 }}"
+                                    value="A" required>
+                                A) {{ q.options.A }}
+                            </label>
+                            <label class="list-group-item">
+                                <input class="form-check-input me-1" type="radio" name="question_{{ loop.index0 }}"
+                                    value="B">
+                                B) {{ q.options.B }}
+                            </label>
+                            <label class="list-group-item">
+                                <input class="form-check-input me-1" type="radio" name="question_{{ loop.index0 }}"
+                                    value="C">
+                                C) {{ q.options.C }}
+                            </label>
+                            <label class="list-group-item">
+                                <input class="form-check-input me-1" type="radio" name="question_{{ loop.index0 }}"
+                                    value="D">
+                                D) {{ q.options.D }}
+                            </label>
+                        </div>
+                    </div>
+                    {% endfor %}
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg">Submit Quiz</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

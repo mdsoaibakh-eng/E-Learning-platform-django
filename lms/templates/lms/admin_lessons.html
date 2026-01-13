@@ -1,0 +1,91 @@
+{% extends "lms/base.html" %}
+
+{% block title %}Manage Lessons (Admin) - {{ course.title }}{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Add New Lesson (Admin)</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data"> {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="title" class="form-label">Lesson Title</label>
+                        <input type="text" name="title" id="title" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <textarea name="content" id="content" rows="4" class="form-control"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="instructor_id" class="form-label">Assign Instructor to Course</label>
+                        <select name="instructor_id" id="instructor_id" class="form-select">
+                            <option value="">-- Select Instructor --</option>
+                            {% for instructor in instructors %}
+                            <option value="{{ instructor.id }}" {% if course.instructor_id==instructor.id %}selected{%
+                                endif %}>
+                                {{ instructor.full_name|default:instructor.username }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="video_file" class="form-label">Video File (MP4, Optional)</label>
+                        <input type="file" name="video_file" id="video_file" class="form-control" accept=".mp4">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="notes_file" class="form-label">Notes (PDF, Optional)</label>
+                        <input type="file" name="notes_file" id="notes_file" class="form-control" accept=".pdf">
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-success">Add Lesson</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0">Existing Lessons</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                {% if course.lessons %}
+                {% for lesson in course.lessons %}
+                <div class="list-group-item">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">{{ loop.index }}. {{ lesson.title }}</h6>
+                        <small class="text-muted">{{ lesson.created_at.strftime('%Y-%m-%d') }}</small>
+                    </div>
+                    <p class="mb-1 text-truncate">{{ lesson.content }}</p>
+                    {% if lesson.video_file %}
+                    <span class="badge bg-info text-dark"><i class="bi bi-camera-video"></i> Video</span>
+                    {% endif %}
+                    {% if lesson.notes_file %}
+                    <span class="badge bg-secondary"><i class="bi bi-file-earmark-pdf"></i> PDF</span>
+                    {% endif %}
+
+                    <div class="mt-2">
+                        <!-- Future: Add Delete button for Admin -->
+                    </div>
+                </div>
+                {% endfor %}
+                {% else %}
+                <div class="list-group-item">No lessons added yet.</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="mt-3">
+            <a href="{% url 'index' %}" class="btn btn-secondary">&larr; Back to Courses</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

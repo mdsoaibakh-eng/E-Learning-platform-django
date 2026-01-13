@@ -1,0 +1,52 @@
+{% extends "lms/base.html" %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <h2>Manage Instructors</h2>
+        <a href="{% url 'admin_create_instructor' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add New Instructor
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card shadow">
+            <div class="card-body">
+                {% if instructors %}
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Created At</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for instructor in instructors %}
+                            <tr>
+                                <td>{{ instructor.username }}</td>
+                                <td>{{ instructor.created_at|date:'Y-m-d' }}</td>
+                                <td>
+                                    <form action="{% url 'admin_delete_instructor' id=instructor.id %}" method="POST"
+                                        style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-danger"
+                                            onclick="return confirm('Are you sure?')">Delete</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                {% else %}
+                <p class="text-muted">No instructors found.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,184 @@
+{% extends "lms/base.html" %}
+
+{% block title %}Learn: {{ course.title }} - E-Learning{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-4 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">Course Content</h5>
+            </div>
+            <div class="list-group list-group-flush">
+                {% if course.lessons %}
+                {% for lesson in course.lessons %}
+                <a href="#" class="list-group-item list-group-item-action lesson-link" data-id="{{ lesson.id }}"
+                    data-title="{{ lesson.title }}" data-content="{{ lesson.content }}"
+                    data-video="{{ lesson.video_file if lesson.video_file else '' }}"
+                    data-notes="{{ lesson.notes_file if lesson.notes_file else '' }}">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">{{ loop.index }}. {{ lesson.title }}</h6>
+                    </div>
+                </a>
+                {% endfor %}
+                {% else %}
+                <div class="list-group-item">No lessons available yet.</div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-body">
+                <h2 id="lesson-title" class="card-title">Select a lesson to start</h2>
+                <hr>
+                <div id="lesson-content">
+                    <p class="text-muted">Click on a lesson from the sidebar to view its content.</p>
+                </div>
+
+                <div id="lesson-actions" class="mt-4 d-none">
+                    <button id="mark-complete-btn" class="btn btn-outline-success">
+                        <i class="bi bi-check-circle"></i> Mark as Completed
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quizzes and Progress Section -->
+        <div class="card mt-4">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">Quizzes & Certification</h5>
+            </div>
+            <div class="card-body">
+                <h6>Course Progress: <span id="progress-val">{{ course.enrollments[0].progress if course.enrollments
+                        else 0 }}</span>%</h6>
+                <div class="progress mb-3">
+                    <div id="progress-bar" class="progress-bar bg-success" role="progressbar"
+                        style="width: {{ course.enrollments[0].progress if course.enrollments else 0 }}%"></div>
+                </div>
+
+                {% if course.quizzes %}
+                <ul class="list-group mb-3">
+                    {% for quiz in course.quizzes %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ quiz.title }}
+                        <a href="{% url 'student_take_quiz' course_id=course.id, quiz_id=quiz.id %}"
+                            class="btn btn-sm btn-primary">Take Quiz</a>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+
+                {% if course.enrollments and course.enrollments[0].progress == 100 %}
+                <div class="alert alert-success">
+                    <strong>Congratulations!</strong> You have completed this course.
+                </div>
+                <a href="{% url 'student_certificate' course_id=course.id %}" class="btn btn-warning w-100">
+                    <i class="bi bi-award"></i> Download Certificate
+                </a>
+                {% else %}
+                <button class="btn btn-secondary w-100" disabled>Certificate Locked (Complete 100%)</button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const links = document.querySelectorAll('.lesson-link');
+        const titleEl = document.getElementById('lesson-title');
+        const contentEl = document.getElementById('lesson-content');
+        const actionsDiv = document.getElementById('lesson-actions');
+        const markCompleteBtn = document.getElementById('mark-complete-btn');
+        let currentLessonId = null;
+
+        links.forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+
+                // Remove active class from all
+                links.forEach(l => l.classList.remove('active'));
+                // Add active to current
+                this.classList.add('active');
+
+                const title = this.getAttribute('data-title');
+                const content = this.getAttribute('data-content');
+                const video = this.getAttribute('data-video');
+                const notes = this.getAttribute('data-notes');
+
+                // Assuming you might add data-id to links in the future or loop index
+                // For now, let's rely on the fact we need an ID for AJAX. 
+                // We'll trust the loop logic added `data-id` which we need to inject.
+                currentLessonId = this.getAttribute('data-id');
+
+                titleEl.textContent = title;
+                actionsDiv.classList.remove('d-none');
+
+                let htmlContent = '';
+
+                if (video) {
+                    htmlContent += `
+                    <div class="ratio ratio-16x9 mb-3">
+                        <video controls class="w-100">
+                            <source src="/static/uploads/${video}" type="video/mp4">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>`;
+                }
+
+                if (content) {
+                    if (content.startsWith('http')) {
+                        htmlContent += `<div class="mb-3 callout callout-info"><a href="${content}" target="_blank">External Link: ${content}</a></div>`;
+                    } else {
+                        htmlContent += `<div class="mb-3"><p class="lead">${content}</p></div>`;
+                    }
+                }
+
+                if (notes) {
+                    htmlContent += `
+                    <div class="alert alert-secondary d-flex align-items-center" role="alert">
+                        <i class="bi bi-file-earmark-pdf-fill fs-3 me-3 text-danger"></i>
+                        <div>
+                            <strong>Lesson Notes Available</strong><br>
+                            <a href="/static/uploads/${notes}" target="_blank" class="alert-link">Download PDF Notes</a>
+                        </div>
+                    </div>`;
+                }
+
+                contentEl.innerHTML = htmlContent;
+            });
+        });
+
+        markCompleteBtn.addEventListener('click', function () {
+            if (!currentLessonId) return;
+
+            fetch(`/student/lesson/${currentLessonId}/complete`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Lesson marked as complete!');
+                        // Update progress UI
+                        document.getElementById('progress-val').textContent = data.progress;
+                        document.getElementById('progress-bar').style.width = data.progress + '%';
+                        if (data.progress == 100) location.reload();
+                    } else {
+                        alert('Error: ' + data.error);
+                    }
+                });
+        });
+
+        if (links.length > 0) {
+            links[0].click();
+        }
+    });
+</script>
+{% endblock %}

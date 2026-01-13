@@ -1,0 +1,50 @@
+{% extends "lms/base.html" %}
+{% load static %}
+{% block content %}
+<h2>Internship Project Submissions</h2>
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Student</th>
+            <th>Internship</th>
+            <th>Submission Date</th>
+            <th>File</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for s in submissions %}
+        <tr>
+            <td>{{ s.student.username }}</td>
+            <td>{{ s.internship.title }}</td>
+            <td>{{ s.completed_at }}</td>
+            <td><a href="{{ MEDIA_URL }}{{ s.project_submission }}" target="_blank">Download</a>
+            </td>
+            <td>
+                <span
+                    class="badge bg-{% if s.project_status == 'Approved' %}success{% elif s.project_status == 'Rejected' %}danger{% else %}warning{% endif %}">
+                    {{ s.project_status }}
+                </span>
+            </td>
+            <td>
+                {% if s.project_status == 'Submitted' or s.project_status == 'Pending' %}
+                <form action="{% url 'admin_review_submission' enrollment_id=s.id action='approve' %}" method="POST"
+                    class="d-inline">
+                    {% csrf_token %}
+                    <button class="btn btn-success btn-sm">Approve</button>
+                </form>
+                <form action="{% url 'admin_review_submission' enrollment_id=s.id action='reject' %}" method="POST"
+                    class="d-inline">
+                    {% csrf_token %}
+                    <button class="btn btn-danger btn-sm">Reject</button>
+                </form>
+                {% else %}
+                -
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

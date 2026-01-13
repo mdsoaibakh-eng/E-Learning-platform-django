@@ -1,0 +1,120 @@
+{% extends "lms/base.html" %}
+{% load static %}
+{% block content %}
+<h2>Edit Internship: {{ internship.title }}</h2>
+
+<!-- Update Details -->
+<div class="card mb-4">
+    <div class="card-header">Details</div>
+    <div class="card-body">
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="update_details" value="1">
+            <div class="mb-3">
+                <label>Title</label>
+                <input type="text" name="title" value="{{ internship.title }}" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label>Description</label>
+                <textarea name="description" class="form-control">{{ internship.description }}</textarea>
+            </div>
+            <div class="mb-3">
+                <label>Duration</label>
+                <input type="text" name="duration" value="{{ internship.duration }}" class="form-control">
+            </div>
+            <div class="mb-3">
+                <label>Instructor</label>
+                <select name="instructor_id" class="form-control">
+                    <option value="">-- None --</option>
+                    {% for inst in instructors %}
+                    <option value="{{ inst.id }}" {% if internship.instructor_id==inst.id %}selected{% endif %}>{{
+                        inst.username }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Update Details</button>
+        </form>
+    </div>
+</div>
+
+<!-- Materials -->
+<div class="card mb-4">
+    <div class="card-header">Learning Materials</div>
+    <div class="card-body">
+        <ul>
+            {% for m in internship.materials.all %}
+            <li>{{ m.title }} ({{ m.resource_type }}) - <a href="{{ MEDIA_URL }}{{ m.file_path }}"
+                    target="_blank">View</a></li>
+            {% endfor %}
+        </ul>
+        <hr>
+        <h5>Add Material</h5>
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="add_material" value="1">
+            <div class="mb-3">
+                <label>Title</label>
+                <input type="text" name="mat_title" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label>File (PDF/Video)</label>
+                <input type="file" name="mat_file" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-success">Upload Material</button>
+        </form>
+    </div>
+</div>
+
+<!-- Quizzes -->
+<div class="card mb-4">
+    <div class="card-header">Quizzes</div>
+    <div class="card-body">
+        <ul>
+            {% for q in internship.quizzes.all %}
+            <li>{{ q.title }}</li>
+            {% endfor %}
+        </ul>
+        <hr>
+        <h5>Add Quiz</h5>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="create_quiz" value="1">
+            <div class="mb-3">
+                <label>Quiz Title</label>
+                <input type="text" name="quiz_title" class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label>Questions JSON (Format: `[{"text": "Q1", "options": ["A", "B"], "correct": "A"}]`)</label>
+                <textarea name="questions_json" class="form-control" rows="5"
+                    required>[{"text": "Sample Question?", "options": ["Option A", "Option B"], "correct": "Option A"}]</textarea>
+            </div>
+            <button type="submit" class="btn btn-success">Add Quiz</button>
+        </form>
+    </div>
+</div>
+
+<!-- Project -->
+<div class="card mb-4">
+    <div class="card-header">Final Project Definition</div>
+    <div class="card-body">
+        {% with proj=internship.projects.first %}
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="set_project" value="1">
+            <div class="mb-3">
+                <label>Project Title</label>
+                <input type="text" name="proj_title" value="{% if proj %}{{ proj.title }}{% endif %}"
+                    class="form-control" required>
+            </div>
+            <div class="mb-3">
+                <label>Project Instructions</label>
+                <textarea name="proj_desc" class="form-control" rows="5"
+                    required>{% if proj %}{{ proj.description }}{% endif %}</textarea>
+            </div>
+            <button type="submit" class="btn btn-warning">Save Project</button>
+        </form>
+        {% endwith %}
+    </div>
+</div>
+
+{% endblock %}

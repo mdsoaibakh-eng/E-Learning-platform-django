@@ -1,0 +1,26 @@
+{% extends "lms/base.html" %}
+{% block content %}
+<h2>Internships</h2>
+<div class="row">
+    {% for i in internships %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <h5 class="card-title">{{ i.title }}</h5>
+                <p class="card-text">{{ i.description|truncatechars:100 }}...</p>
+                <p><strong>Duration:</strong> {{ i.duration }}</p>
+                <!-- Simple Enroll Form -->
+                {% if request.session.student_id %}
+                <form action="{% url 'student_enroll_internship' internship_id=i.id %}" method="POST">
+                    {% csrf_token %}
+                    <button class="btn btn-primary">Enroll Now</button>
+                </form>
+                {% else %}
+                <a href="{% url 'student_login' %}" class="btn btn-secondary">Login to Enroll</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

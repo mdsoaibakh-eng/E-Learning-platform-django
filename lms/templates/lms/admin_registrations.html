@@ -1,0 +1,56 @@
+{% extends "lms/base.html" %}
+
+{% block title %}Manage Registrations - CampusEvents{% endblock %}
+
+{% block content %}
+<div class="dashboard-header">
+    <h1>Event Registrations</h1>
+    <p>Manage student registrations for events.</p>
+</div>
+
+<div class="registrations-list">
+    {% if registrations %}
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Student</th>
+                    <th>Event</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for reg in registrations %}
+                <tr>
+                    <td>
+                        <strong>{{ reg.student.username }}</strong><br>
+                        <small class="muted">{{ reg.student.email }}</small>
+                    </td>
+                    <td>{{ reg.event.title }}</td>
+                    <td>{{ reg.event.date.strftime('%b %d, %Y') }}</td>
+                    <td>
+                        <span class="status-badge status-{{ reg.status.lower() }}">{{ reg.status }}</span>
+                    </td>
+                    <td>
+                        {% if reg.status == 'Pending' %}
+                        <form action="{% url 'approve_registration' reg_id=reg.id %}" method="POST"
+                            style="display:inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-success">Approve</button>
+                        </form>
+                        {% else %}
+                        <span class="muted">-</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <p>No registrations found.</p>
+    {% endif %}
+</div>
+{% endblock %}
