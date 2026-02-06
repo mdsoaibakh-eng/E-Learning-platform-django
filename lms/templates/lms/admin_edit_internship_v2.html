@@ -27,7 +27,7 @@
                 <select name="instructor_id" class="form-control">
                     <option value="">-- None --</option>
                     {% for inst in instructors %}
-                    <option value="{{ inst.id }}" {% if internship.instructor_id==inst.id %}selected{% endif %}>{{
+                    <option value="{{ inst.id }}" {% if internship.instructor_id == inst.id %}selected{% endif %}>{{
                         inst.username }}</option>
                     {% endfor %}
                 </select>

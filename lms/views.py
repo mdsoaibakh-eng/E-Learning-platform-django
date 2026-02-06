@@ -350,6 +350,8 @@ def admin_edit_internship(request, internship_id):
             if 'mat_file' in request.FILES:
                 f = request.FILES['mat_file']
                 filename = f"int_mat_{uuid.uuid4().hex[:8]}_{f.name}"
+                if not os.path.exists(settings.MEDIA_ROOT):
+                    os.makedirs(settings.MEDIA_ROOT, exist_ok=True)
                 with open(os.path.join(settings.MEDIA_ROOT, filename), 'wb+') as dest:
                     for chunk in f.chunks():
                         dest.write(chunk)

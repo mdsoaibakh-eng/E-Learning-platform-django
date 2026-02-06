@@ -18,8 +18,12 @@
                 Completion</h1>
             <p class="lead text-uppercase letter-spacing-2">This is to certify that</p>
 
-            <h2 class="display-5 mb-4 fw-bold text-dark border-bottom d-inline-block px-5 pb-2">{{
-                student.full_name|default:student.username|upper }}
+            <h2 class="display-5 mb-4 fw-bold text-dark border-bottom d-inline-block px-5 pb-2">
+                {% if student.full_name %}
+                {{ student.full_name|upper }}
+                {% else %}
+                {{ student.username|upper }}
+                {% endif %}
             </h2>
 
             <p class="lead">has successfully completed the internship</p>
@@ -72,65 +76,83 @@
 
     @media print {
         @page {
-            size: landscape;
+            size: A4 landscape;
             margin: 0;
         }
 
-        body,
-        html {
-            width: 100%;
-            height: 100%;
-            margin: 0 !important;
-            padding: 0 !important;
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
+        /* 
+           Blank Page Fix Strategy:
+           1. Use visibility hidden instead of display none on parents to keep the DOM structure
+           but hide content.
+           2. Make the card visible and position fixed to viewport.
+        */
+
+        body {
+            visibility: hidden;
+            margin: 0;
+            padding: 0;
+            background-color: white;
         }
 
-        .no-print,
-        .navbar,
-        .footer {
-            display: none !important;
+        /* Hide all children of body */
+        body * {
+            visibility: hidden;
         }
 
-        /* Container fills the page */
-        .container {
-            width: 100% !important;
-            max-width: none !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            height: 100%;
+        /* Make the certificate and its children visible */
+        .card,
+        .card * {
+            visibility: visible;
         }
 
-        /* Card using 297mm x 210mm A4 dimensions */
         .card {
-            position: fixed;
-            top: 0;
-            left: 0;
+            /* Force exact A4 dimensions */
             width: 297mm !important;
-            /* Forces A4 Landscape width */
             height: 210mm !important;
-            /* Forces A4 Landscape height */
+
+            /* Position fixed relative to the page viewport (the paper) */
+            position: fixed !important;
+            left: 50% !important;
+            top: 50% !important;
+
+            /* Center and Scale */
+            transform: translate(-50%, -50%) scale(0.95) !important;
+            transform-origin: center center !important;
+
             margin: 0 !important;
             padding: 0 !important;
             border: none !important;
             border-radius: 0 !important;
             background: linear-gradient(to bottom right, #ffffff, #f8f9fa) !important;
             box-shadow: none !important;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
+
+            z-index: 99999;
+
+            /* Ensure colors print */
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+            color-adjust: exact !important;
+
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
         }
 
         .card-body {
+            visibility: visible !important;
             border: 10px double #1a4a7c !important;
             width: 95% !important;
             height: 90% !important;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            margin: auto;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: center !important;
+            margin: auto !important;
             padding: 40px !important;
+        }
+
+        /* Ensure specific elements are visible */
+        .bi {
+            visibility: visible !important;
         }
     }
 </style>
